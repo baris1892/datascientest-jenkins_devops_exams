@@ -12,7 +12,7 @@ env:
   DATABASE_URI: "postgresql://movie_db_username:movie_db_password@movie-service-db/movie_db"
 
   # URL for the Movie Service to call the Cast Service internally within the Kubernetes cluster.
-  # Use the Service name and its ClusterIP port (80), NOT the NodePort (30008).
+  # Use the Service name and its ClusterIP port (80), NOT the NodePort.
   # Since both services run in the same namespace (e.g. dev), the host is simply "cast-service:80".
   CAST_SERVICE_HOST_URL: "http://cast-service:80/api/v1/casts/"
 
@@ -37,7 +37,6 @@ securityContext: { }
 service:
   type: NodePort
   port: 80
-  nodePort: 30008
   targetPort: 8000
 
 ingress:
