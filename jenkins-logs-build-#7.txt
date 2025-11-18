@@ -1,0 +1,433 @@
+Started by user Baris
+Obtained Jenkinsfile from git https://github.com/baris1892/datascientest-jenkins_devops_exams
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/datascientest-jenkins-exam
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/datascientest-jenkins-exam/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/baris1892/datascientest-jenkins_devops_exams # timeout=10
+Fetching upstream changes from https://github.com/baris1892/datascientest-jenkins_devops_exams
+ > git --version # timeout=10
+ > git --version # 'git version 2.43.0'
+ > git fetch --tags --force --progress -- https://github.com/baris1892/datascientest-jenkins_devops_exams +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+Checking out Revision 7b041f66746b593dbed3a0a51fb559d76fd3d709 (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 7b041f66746b593dbed3a0a51fb559d76fd3d709 # timeout=10
+Commit message: "don't set nodePort manually, let k8s assign it automatically"
+ > git rev-list --no-walk 7b041f66746b593dbed3a0a51fb559d76fd3d709 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Docker Build)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ docker build -t baris1892/datascientest-movie-service:v.7.0 ./movie-service
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 284B done
+#1 DONE 0.0s
+
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.8-slim
+#3 DONE 0.5s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/python:3.8-slim@sha256:1d52838af602b4b5a831beb13a0e4d073280665ea7be7f69ce2382f29c5a613f
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 334B done
+#6 DONE 0.0s
+
+#7 [5/6] RUN pip install -r /app/requirements.txt     && rm -rf /root/.cache/pip
+#7 CACHED
+
+#8 [4/6] RUN apt-get update     && apt-get install gcc -y     && apt-get clean
+#8 CACHED
+
+#9 [2/6] WORKDIR /app
+#9 CACHED
+
+#10 [3/6] COPY ./requirements.txt /app/requirements.txt
+#10 CACHED
+
+#11 [6/6] COPY . /app/
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers done
+#12 writing image sha256:367e171804b1bc97b7412f2c4ec7d4e86131eced389f63484ae6c9e6d93a445d done
+#12 naming to docker.io/baris1892/datascientest-movie-service:v.7.0 done
+#12 DONE 0.0s
+[Pipeline] sh
++ docker build -t baris1892/datascientest-cast-service:v.7.0 ./cast-service
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 284B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.8-slim
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/6] FROM docker.io/library/python:3.8-slim@sha256:1d52838af602b4b5a831beb13a0e4d073280665ea7be7f69ce2382f29c5a613f
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 295B done
+#5 DONE 0.0s
+
+#6 [4/6] RUN apt-get update     && apt-get install gcc -y     && apt-get clean
+#6 CACHED
+
+#7 [2/6] WORKDIR /app
+#7 CACHED
+
+#8 [3/6] COPY ./requirements.txt /app/requirements.txt
+#8 CACHED
+
+#9 [5/6] RUN pip install -r /app/requirements.txt     && rm -rf /root/.cache/pip
+#9 CACHED
+
+#10 [6/6] COPY . /app/
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 writing image sha256:b525f04cc4d735fdb9ecb3527e0be58cde390189568f8dc49f2b91eb7c226c80 done
+#11 naming to docker.io/baris1892/datascientest-cast-service:v.7.0 done
+#11 DONE 0.0s
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Push)
+[Pipeline] withCredentials
+Masking supported pattern matches of $DOCKER_PASS
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
+Warning: A secret was passed to "sh" using Groovy String interpolation, which is insecure.
+		 Affected argument(s) used the following variable(s): [DOCKER_PASS]
+		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
++ docker login -u baris1892 -p ****
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+Login Succeeded
++ docker push baris1892/datascientest-movie-service:v.7.0
+The push refers to repository [docker.io/baris1892/datascientest-movie-service]
+607bedd0cc4f: Preparing
+43cc231b2b21: Preparing
+d054e2b7d135: Preparing
+4dd85a1f79f4: Preparing
+026db65cc007: Preparing
+d2a2207b52a4: Preparing
+5d2d143f3d7f: Preparing
+c3772b569c3a: Preparing
+8d853c8add5d: Preparing
+d2a2207b52a4: Waiting
+8d853c8add5d: Waiting
+5d2d143f3d7f: Waiting
+c3772b569c3a: Waiting
+d054e2b7d135: Layer already exists
+026db65cc007: Layer already exists
+607bedd0cc4f: Layer already exists
+43cc231b2b21: Layer already exists
+4dd85a1f79f4: Layer already exists
+c3772b569c3a: Layer already exists
+5d2d143f3d7f: Layer already exists
+d2a2207b52a4: Layer already exists
+8d853c8add5d: Layer already exists
+v.7.0: digest: sha256:3a4b52d7344d09510f0975626f10230763966a0d98ca2a1b69ec33786de09aaf size: 2205
++ docker push baris1892/datascientest-cast-service:v.7.0
+The push refers to repository [docker.io/baris1892/datascientest-cast-service]
+82420951796d: Preparing
+1aceac9354b9: Preparing
+50b847937045: Preparing
+8df00834c297: Preparing
+026db65cc007: Preparing
+d2a2207b52a4: Preparing
+5d2d143f3d7f: Preparing
+c3772b569c3a: Preparing
+8d853c8add5d: Preparing
+d2a2207b52a4: Waiting
+5d2d143f3d7f: Waiting
+c3772b569c3a: Waiting
+8d853c8add5d: Waiting
+026db65cc007: Layer already exists
+8df00834c297: Layer already exists
+82420951796d: Layer already exists
+50b847937045: Layer already exists
+1aceac9354b9: Layer already exists
+d2a2207b52a4: Layer already exists
+5d2d143f3d7f: Layer already exists
+c3772b569c3a: Layer already exists
+8d853c8add5d: Layer already exists
+v.7.0: digest: sha256:fa82128690feb7798c62f60e9b367f642da2f4663c0a4d3b15c72563d0e9ad15 size: 2205
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deployment in dev)
+[Pipeline] withCredentials
+Masking supported pattern matches of $KUBECONFIG
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ rm -Rf .kube
++ mkdir .kube
++ ls
+Jenkinsfile
+README.md
+cast-service
+charts
+docker-compose.yml
+movie-service
+nginx_config.conf
+values-cast-service.yml
+values-movie-service.yml
++ cat ****
++ cp charts/values-cast-service.yaml values-cast-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace dev
+Release "cast-service" has been upgraded. Happy Helming!
+NAME: cast-service
+LAST DEPLOYED: Tue Nov 18 17:11:41 2025
+NAMESPACE: dev
+STATUS: deployed
+REVISION: 11
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace dev -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
+  export NODE_IP=$(kubectl get nodes --namespace dev -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
++ cp charts/values-movie-service.yaml values-movie-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace dev
+Release "movie-service" has been upgraded. Happy Helming!
+NAME: movie-service
+LAST DEPLOYED: Tue Nov 18 17:11:42 2025
+NAMESPACE: dev
+STATUS: deployed
+REVISION: 7
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace dev -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
+  export NODE_IP=$(kubectl get nodes --namespace dev -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deployment in qa)
+[Pipeline] withCredentials
+Masking supported pattern matches of $KUBECONFIG
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ rm -Rf .kube
++ mkdir .kube
++ ls
+Jenkinsfile
+README.md
+cast-service
+charts
+docker-compose.yml
+movie-service
+nginx_config.conf
+values-cast-service.yml
+values-movie-service.yml
++ cat ****
++ cp charts/values-cast-service.yaml values-cast-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace qa
+Release "cast-service" has been upgraded. Happy Helming!
+NAME: cast-service
+LAST DEPLOYED: Tue Nov 18 17:11:45 2025
+NAMESPACE: qa
+STATUS: deployed
+REVISION: 3
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace qa -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
+  export NODE_IP=$(kubectl get nodes --namespace qa -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
++ cp charts/values-movie-service.yaml values-movie-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace qa
+Release "movie-service" has been upgraded. Happy Helming!
+NAME: movie-service
+LAST DEPLOYED: Tue Nov 18 17:11:47 2025
+NAMESPACE: qa
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace qa -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
+  export NODE_IP=$(kubectl get nodes --namespace qa -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deployment in staging)
+[Pipeline] withCredentials
+Masking supported pattern matches of $KUBECONFIG
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ rm -Rf .kube
++ mkdir .kube
++ ls
+Jenkinsfile
+README.md
+cast-service
+charts
+docker-compose.yml
+movie-service
+nginx_config.conf
+values-cast-service.yml
+values-movie-service.yml
++ cat ****
++ cp charts/values-cast-service.yaml values-cast-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace staging
+Release "cast-service" has been upgraded. Happy Helming!
+NAME: cast-service
+LAST DEPLOYED: Tue Nov 18 17:11:51 2025
+NAMESPACE: staging
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace staging -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
+  export NODE_IP=$(kubectl get nodes --namespace staging -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
++ cp charts/values-movie-service.yaml values-movie-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace staging
+Release "movie-service" has been upgraded. Happy Helming!
+NAME: movie-service
+LAST DEPLOYED: Tue Nov 18 17:11:52 2025
+NAMESPACE: staging
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace staging -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
+  export NODE_IP=$(kubectl get nodes --namespace staging -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deployment in prod)
+[Pipeline] withCredentials
+Masking supported pattern matches of $KUBECONFIG
+[Pipeline] {
+[Pipeline] timeout
+Timeout set to expire in 15 min
+[Pipeline] {
+[Pipeline] input
+Do you want to deploy in production ?
+Yes or Abort
+Approved by Baris
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ rm -Rf .kube
++ mkdir .kube
++ ls
+Jenkinsfile
+README.md
+cast-service
+charts
+docker-compose.yml
+movie-service
+nginx_config.conf
+values-cast-service.yml
+values-movie-service.yml
++ cat ****
++ cp charts/values-cast-service.yaml values-cast-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace prod
+Release "cast-service" has been upgraded. Happy Helming!
+NAME: cast-service
+LAST DEPLOYED: Tue Nov 18 17:12:06 2025
+NAMESPACE: prod
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace prod -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
+  export NODE_IP=$(kubectl get nodes --namespace prod -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
++ cp charts/values-movie-service.yaml values-movie-service.yml
++ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace prod
+Release "movie-service" has been upgraded. Happy Helming!
+NAME: movie-service
+LAST DEPLOYED: Tue Nov 18 17:12:08 2025
+NAMESPACE: prod
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace prod -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
+  export NODE_IP=$(kubectl get nodes --namespace prod -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
