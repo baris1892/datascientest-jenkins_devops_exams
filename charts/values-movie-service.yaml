@@ -1,23 +1,23 @@
-# Default values for fastapiapp.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-replicaCount: 3
+replicaCount: 1
 
 image:
-  repository: sajjadhz/fastapiapp
-  pullPolicy: IfNotPresent
+  # see https://hub.docker.com/repository/docker/baris1892/datascientest-movie-service/general
+  repository: baris1892/datascientest-movie-service
+  pullPolicy: Always
+
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "develop"
 
 env:
-  DATABASE_URI: "postgresql://cast_db_username:cast_db_password@cast-service-db/cast_db"
+  DATABASE_URI: "postgresql://movie_db_username:movie_db_password@movie-service-db/movie_db"
 
+  # URL for the Movie Service to call the Cast Service internally within the Kubernetes cluster.
+  # Use the Service name and its ClusterIP port (80), NOT the NodePort (30008).
+  # Since both services run in the same namespace (e.g. dev), the host is simply "cast-service:80".
+  CAST_SERVICE_HOST_URL: "http://cast-service:80/api/v1/casts/"
 
-imagePullSecrets:
-  - name: "regcred"
-nameOverride: cast-service
-fullnameOverride: cast-service
+nameOverride: "movie-service"
+fullnameOverride: "movie-service"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -37,7 +37,7 @@ securityContext: { }
 service:
   type: NodePort
   port: 80
-  nodePort: 30007
+  nodePort: 30008
   targetPort: 8000
 
 ingress:
@@ -69,7 +69,7 @@ affinity: { }
 postgres:
   image: postgres:12.1-alpine
   pullPolicy: IfNotPresent
-  username: cast_db_username
-  password: cast_db_password
-  db: cast_db
+  username: movie_db_username
+  password: movie_db_password
+  db: movie_db
   storage: 1Gi

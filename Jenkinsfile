@@ -3,10 +3,8 @@ pipeline {
         DOCKER_ID = "baris1892"
         DOCKER_IMAGE_MOVIE_SERVICE = "datascientest-movie-service"
         DOCKER_IMAGE_CAST_SERVICE = "datascientest-cast-service"
-        // DOCKER_TAG = "v.${BUILD_ID}.0"
+        DOCKER_TAG = "v.${BUILD_ID}.0"
         // we will tag our images with the current build in order to increment the value by 1 with each new build
-
-        DOCKER_TAG = "develop"
     }
 
     agent any
@@ -44,75 +42,120 @@ pipeline {
             }
         }
 
-//        stage('Deployment in dev') {
-//            environment {
-//                KUBECONFIG = credentials("config")
-//                // we retrieve kubeconfig from secret file called config saved on jenkins
-//            }
-//
-//            steps {
-//                script {
-//                    sh '''
-//                rm -Rf .kube
-//                mkdir .kube
-//                ls
-//                cat $KUBECONFIG > .kube/config
-//                cp fastapi/values.yaml values.yml
-//                cat values.yml
-//                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-//                helm upgrade --install app fastapi --values=values.yml --namespace dev
-//                '''
-//                }
-//            }
-//        }
-//
-//        stage('Deployment in staging') {
-//            environment {
-//                KUBECONFIG = credentials("config")
-//                // we retrieve kubeconfig from secret file called config saved on jenkins
-//            }
-//            steps {
-//                script {
-//                    sh '''
-//                rm -Rf .kube
-//                mkdir .kube
-//                ls
-//                cat $KUBECONFIG > .kube/config
-//                cp fastapi/values.yaml values.yml
-//                cat values.yml
-//                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-//                helm upgrade --install app fastapi --values=values.yml --namespace staging
-//                '''
-//                }
-//            }
-//        }
-//
-//        stage('Deployment in prod') {
-//            environment {
-//                KUBECONFIG = credentials("config")
-//                // we retrieve kubeconfig from secret file called config saved on jenkins
-//            }
-//            steps {
-//                // Create an Approval Button with a timeout of 15minutes.
-//                // this require a manuel validation in order to deploy on production environment
-//                timeout(time: 15, unit: "MINUTES") {
-//                    input message: 'Do you want to deploy in production ?', ok: 'Yes'
-//                }
-//
-//                script {
-//                    sh '''
-//                rm -Rf .kube
-//                mkdir .kube
-//                ls
-//                cat $KUBECONFIG > .kube/config
-//                cp fastapi/values.yaml values.yml
-//                cat values.yml
-//                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-//                helm upgrade --install app fastapi --values=values.yml --namespace prod
-//                '''
-//                }
-//            }
-//        }
+        stage('Deployment in dev') {
+            environment {
+                KUBECONFIG = credentials("config")
+                // we retrieve kubeconfig from secret file called config saved on jenkins
+            }
+
+            steps {
+                script {
+                    sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                
+                # Cast Service
+                cp charts/values-cast-service.yaml values-cast-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-cast-service.yml
+                helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace dev
+
+                # Movie Service
+                cp charts/values-movie-service.yaml values-movie-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-movie-service.yml
+                helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace dev
+                '''
+                }
+            }
+        }
+
+        stage('Deployment in qa') {
+            environment {
+                KUBECONFIG = credentials("config")
+                // we retrieve kubeconfig from secret file called config saved on jenkins
+            }
+            steps {
+                script {
+                    sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                
+                # Cast Service
+                cp charts/values-cast-service.yaml values-cast-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-cast-service.yml
+                helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace qa
+
+                # Movie Service
+                cp charts/values-movie-service.yaml values-movie-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-movie-service.yml
+                helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace qa
+                '''
+                }
+            }
+        }
+
+        stage('Deployment in staging') {
+            environment {
+                KUBECONFIG = credentials("config")
+                // we retrieve kubeconfig from secret file called config saved on jenkins
+            }
+            steps {
+                script {
+                    sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                
+                # Cast Service
+                cp charts/values-cast-service.yaml values-cast-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-cast-service.yml
+                helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace staging
+
+                # Movie Service
+                cp charts/values-movie-service.yaml values-movie-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-movie-service.yml
+                helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace staging
+                '''
+                }
+            }
+        }
+
+        stage('Deployment in prod') {
+            environment {
+                KUBECONFIG = credentials("config")
+                // we retrieve kubeconfig from secret file called config saved on jenkins
+            }
+            steps {
+                // Create an Approval Button with a timeout of 15minutes.
+                // this require a manuel validation in order to deploy on production environment
+                timeout(time: 15, unit: "MINUTES") {
+                    input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                }
+
+                script {
+                    sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+                
+                # Cast Service
+                cp charts/values-cast-service.yaml values-cast-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-cast-service.yml
+                helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace prod
+
+                # Movie Service
+                cp charts/values-movie-service.yaml values-movie-service.yml
+                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values-movie-service.yml
+                helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace prod
+                '''
+                }
+            }
+        }
 
     }
 }
