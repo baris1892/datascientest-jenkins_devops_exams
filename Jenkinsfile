@@ -29,7 +29,10 @@ pipeline {
             steps {
                 script {
                     sh """
-            docker run -d --name movie-test -p 8081:8000 $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG
+            docker run -d --name movie-test -p 8081:8000 \\
+              $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
+              uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+            
             sleep 10
             curl --verbose --fail http://localhost:8081/api/v1/checkapi
             docker stop movie-test && docker rm movie-test
@@ -42,7 +45,10 @@ pipeline {
             steps {
                 script {
                     sh """
-            docker run -d --name cast-test -p 8082:8000 $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG
+            docker run -d --name movie-test -p 8082:8000 \\
+              $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
+              uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+
             sleep 10
             curl --verbose --fail http://localhost:8082/api/v1/checkapi
             docker stop cast-test && docker rm cast-test
