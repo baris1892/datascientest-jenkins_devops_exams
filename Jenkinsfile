@@ -49,26 +49,26 @@ pipeline {
                 script {
                     sh """
             # 1. Cleanup
-            docker rm -f cast-test || true
-            docker rm -f postgres-test || true
-            docker network create test-net || true
+            docker rm -f cast-test 2>/dev/null || true
+            docker rm -f postgres-test 2>/dev/null || true
+            docker network create test-net 2>/dev/null || true
 
             # 2. Start Postgres Container
             docker run -d --name postgres-test --network test-net \\
-                -e POSTGRES_USER=cast_user \\
-                -e POSTGRES_PASSWORD=cast_pass \\
-                -e POSTGRES_DB=cast_db \\
+                -e POSTGRES_USER=user \\
+                -e POSTGRES_PASSWORD=password \\
+                -e POSTGRES_DB=db \\
                 postgres:12.1-alpine
 
             # 3. Wait until Postgres is ready
-            until docker exec postgres-test pg_isready -U cast_user; do
+            until docker exec postgres-test pg_isready -U user; do
                 echo "Waiting for Postgres..."
                 sleep 2
             done
 
             # 4. Start Cast Service
             docker run -d --name cast-test --network test-net -p 8082:8000 \\
-                -e DATABASE_URI=postgresql://cast_user:cast_pass@postgres-test/cast_db \\
+                -e DATABASE_URI=postgresql://user:password@postgres-test/db \\
                 $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
                 uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
 
