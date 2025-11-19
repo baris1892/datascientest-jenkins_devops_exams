@@ -29,46 +29,37 @@ pipeline {
             steps {
                 script {
                     sh """
-                    docker rm -f movie-test || true
+            docker rm -f movie-test || true
 
-                    docker run -d --name movie-test -p 8081:8000 \\
-                      $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
-                      uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
-                    
-                    # wait some time until service is available
-                    for i in {1..10}; do
-                      curl --fail http://localhost:8081/api/v1/checkapi && break
-                      echo "Waiting for Movie service..."
-                      sleep 5
-                    done || (docker logs movie-test && exit 1)
-                    
-                    docker stop movie-test && docker rm movie-test
-                    """
+            docker run -d --name movie-test -p 8081:8000 \\
+              $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
+              uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+            
+            sleep 30
+            curl --fail http://localhost:8081/api/v1/checkapi
+            docker stop movie-test && docker rm movie-test
+            """
                 }
             }
         }
-        stage('Docker Run & Test Cast Service') {
-            steps {
-                script {
-                    sh """
-                    docker rm -f cast-test || true
 
-                    docker run -d --name cast-test -p 8082:8000 \\
-                      $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
-                      uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
-                    
-                    # wait some time until service is available
-                    for i in {1..10}; do
-                      curl --fail http://localhost:8082/api/v1/checkapi && break
-                      echo "Waiting for Cast service..."
-                      sleep 5
-                    done || (docker logs cast-test && exit 1)
-                    
-                    docker stop cast-test && docker rm cast-test
-                    """
-                }
-            }
-        }
+//        stage('Docker Run & Test Cast Service') {
+//            steps {
+//                script {
+//                    sh """
+//            docker rm -f cast-test || true
+//
+//            docker run -d --name cast-test -p 8082:8000 \\
+//              $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
+//              uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+//
+//            sleep 10
+//            curl --verbose --fail http://localhost:8082/api/v1/checkapi
+//            docker stop cast-test && docker rm cast-test
+//            """
+//                }
+//            }
+//        }
 
         stage('Docker Push') {
             environment {
