@@ -26,24 +26,6 @@ pipeline {
             }
         }
 
-//        stage('Docker Run & Test Movie Service') {
-//            steps {
-//                script {
-//                    sh """
-//            docker rm -f movie-test || true
-//
-//            docker run -d --name movie-test -p 8081:8000 \\
-//              $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
-//              uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
-//
-//            sleep 30
-//            curl --fail http://localhost:8081/api/v1/checkapi
-//            docker stop movie-test && docker rm movie-test
-//            """
-//                }
-//            }
-//        }
-
         stage('Docker Run & Test Cast Service') {
             steps {
                 script {
@@ -66,7 +48,7 @@ pipeline {
                 sleep 2
             done
 
-            # 4. Start Cast Service
+            # 4. Start Service
             docker run -d --name cast-test --network test-net -p 8082:8000 \\
                 -e DATABASE_URI=postgresql://user:password@postgres-test/db \\
                 $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
@@ -81,6 +63,49 @@ pipeline {
             # 7. Cleanup
             docker stop cast-test postgres-test
             docker rm cast-test postgres-test
+            docker network rm test-net
+            """
+                }
+            }
+        }
+
+        stage('Docker Run & Test Movie Service') {
+            steps {
+                script {
+                    sh """
+            # 1. Cleanup
+            docker rm -f movie-test 2>/dev/null || true
+            docker rm -f postgres-test 2>/dev/null || true
+            docker network create test-net 2>/dev/null || true
+
+            # 2. Start Postgres Container
+            docker run -d --name postgres-test --network test-net \\
+                -e POSTGRES_USER=user \\
+                -e POSTGRES_PASSWORD=password \\
+                -e POSTGRES_DB=db \\
+                postgres:12.1-alpine
+
+            # 3. Wait until Postgres is ready
+            until docker exec postgres-test pg_isready -U user; do
+                echo "Waiting for Postgres..."
+                sleep 2
+            done
+
+            # 4. Start Service
+            docker run -d --name movie-test --network test-net -p 8081:8000 \\
+                -e DATABASE_URI=postgresql://user:password@postgres-test/db \\
+                $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
+                uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+
+            # 5. Wait a few seconds to let the app start
+            sleep 10
+
+            # 6. Test endpoint
+            curl --verbose --fail http://localhost:8081/api/v1/checkapi
+
+            # 7. Cleanup
+            docker stop movie-test postgres-test
+            docker rm movie-test postgres-test
             docker network rm test-net
             """
                 }
