@@ -29,6 +29,8 @@ pipeline {
             steps {
                 script {
                     sh """
+            docker rm -f movie-test || true
+
             docker run -d --name movie-test -p 8081:8000 \\
               $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
               uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
@@ -45,6 +47,8 @@ pipeline {
             steps {
                 script {
                     sh """
+            docker rm -f cast-test || true
+            
             docker run -d --name movie-test -p 8082:8000 \\
               $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
               uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
