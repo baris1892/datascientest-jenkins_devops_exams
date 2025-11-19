@@ -3,8 +3,9 @@ pipeline {
         DOCKER_ID = "baris1892"
         DOCKER_IMAGE_MOVIE_SERVICE = "datascientest-movie-service"
         DOCKER_IMAGE_CAST_SERVICE = "datascientest-cast-service"
-        DOCKER_TAG = "v.${BUILD_ID}.0"
+//        DOCKER_TAG = "v.${BUILD_ID}.0"
         // we will tag our images with the current build in order to increment the value by 1 with each new build
+        DOCKER_TAG = "develop"
     }
 
     agent any
@@ -25,41 +26,66 @@ pipeline {
             }
         }
 
-        stage('Docker Run & Test Movie Service') {
-            steps {
-                script {
-                    sh """
-            docker rm -f movie-test || true
-
-            docker run -d --name movie-test -p 8081:8000 \\
-              $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
-              uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
-            
-            sleep 30
-            curl --fail http://localhost:8081/api/v1/checkapi
-            docker stop movie-test && docker rm movie-test
-            """
-                }
-            }
-        }
-
-//        stage('Docker Run & Test Cast Service') {
+//        stage('Docker Run & Test Movie Service') {
 //            steps {
 //                script {
 //                    sh """
-//            docker rm -f cast-test || true
+//            docker rm -f movie-test || true
 //
-//            docker run -d --name cast-test -p 8082:8000 \\
-//              $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
+//            docker run -d --name movie-test -p 8081:8000 \\
+//              $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG \\
 //              uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
 //
-//            sleep 10
-//            curl --verbose --fail http://localhost:8082/api/v1/checkapi
-//            docker stop cast-test && docker rm cast-test
+//            sleep 30
+//            curl --fail http://localhost:8081/api/v1/checkapi
+//            docker stop movie-test && docker rm movie-test
 //            """
 //                }
 //            }
 //        }
+
+        stage('Docker Run & Test Cast Service') {
+            steps {
+                script {
+                    sh """
+            # 1. Cleanup
+            docker rm -f cast-test || true
+            docker rm -f postgres-test || true
+            docker network create test-net || true
+
+            # 2. Start Postgres Container
+            docker run -d --name postgres-test --network test-net \\
+                -e POSTGRES_USER=cast_user \\
+                -e POSTGRES_PASSWORD=cast_pass \\
+                -e POSTGRES_DB=cast_db \\
+                postgres:12.1-alpine
+
+            # 3. Wait until Postgres is ready
+            until docker exec postgres-test pg_isready -U cast_user; do
+                echo "Waiting for Postgres..."
+                sleep 2
+            done
+
+            # 4. Start Cast Service
+            docker run -d --name cast-test --network test-net -p 8082:8000 \\
+                -e DATABASE_URI=postgresql://cast_user:cast_pass@postgres-test/cast_db \\
+                $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
+                uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+
+            # 5. Wait a few seconds to let the app start
+            sleep 10
+
+            # 6. Test endpoint
+            curl --verbose --fail http://localhost:8082/api/v1/checkapi
+
+            # 7. Cleanup
+            docker stop cast-test postgres-test
+            docker rm cast-test postgres-test
+            docker network rm test-net
+            """
+                }
+            }
+        }
 
         stage('Docker Push') {
             environment {
