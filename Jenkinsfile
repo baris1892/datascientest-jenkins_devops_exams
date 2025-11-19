@@ -49,7 +49,7 @@ pipeline {
                     sh """
             docker rm -f cast-test || true
             
-            docker run -d --name movie-test -p 8082:8000 \\
+            docker run -d --name cast-test -p 8082:8000 \\
               $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG \\
               uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
 
