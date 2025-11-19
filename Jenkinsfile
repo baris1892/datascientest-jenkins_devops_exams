@@ -25,6 +25,32 @@ pipeline {
             }
         }
 
+        stage('Docker Run & Test Movie Service') {
+            steps {
+                script {
+                    sh """
+            docker run -d --name movie-test -p 8081:8000 $DOCKER_ID/$DOCKER_IMAGE_MOVIE_SERVICE:$DOCKER_TAG
+            sleep 10
+            curl --verbose --fail http://localhost:8081/api/v1/checkapi
+            docker stop movie-test && docker rm movie-test
+            """
+                }
+            }
+        }
+
+        stage('Docker Run & Test Cast Service') {
+            steps {
+                script {
+                    sh """
+            docker run -d --name cast-test -p 8082:8000 $DOCKER_ID/$DOCKER_IMAGE_CAST_SERVICE:$DOCKER_TAG
+            sleep 10
+            curl --verbose --fail http://localhost:8082/api/v1/checkapi
+            docker stop cast-test && docker rm cast-test
+            """
+                }
+            }
+        }
+
         stage('Docker Push') {
             environment {
                 // we retrieve docker password from secret text called docker_hub_pass saved on jenkins
