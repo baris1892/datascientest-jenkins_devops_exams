@@ -1,4 +1,4 @@
-Started by user Baris
+Started by GitHub push by baris1892
 Obtained Jenkinsfile from git https://github.com/baris1892/datascientest-jenkins_devops_exams
 [Pipeline] Start of Pipeline
 [Pipeline] node
@@ -18,11 +18,11 @@ Fetching upstream changes from https://github.com/baris1892/datascientest-jenkin
  > git --version # 'git version 2.43.0'
  > git fetch --tags --force --progress -- https://github.com/baris1892/datascientest-jenkins_devops_exams +refs/heads/*:refs/remotes/origin/* # timeout=10
  > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
-Checking out Revision 7b041f66746b593dbed3a0a51fb559d76fd3d709 (refs/remotes/origin/master)
+Checking out Revision ec9d892d06ce35109b67b380cb8d1ad252556aab (refs/remotes/origin/master)
  > git config core.sparsecheckout # timeout=10
- > git checkout -f 7b041f66746b593dbed3a0a51fb559d76fd3d709 # timeout=10
-Commit message: "don't set nodePort manually, let k8s assign it automatically"
- > git rev-list --no-walk 7b041f66746b593dbed3a0a51fb559d76fd3d709 # timeout=10
+ > git checkout -f ec9d892d06ce35109b67b380cb8d1ad252556aab # timeout=10
+Commit message: "use correct DOCKER_TAG again"
+ > git rev-list --no-walk 929ac382f3af4f1e131923b7e51e194c5a2e5a24 # timeout=10
 [Pipeline] }
 [Pipeline] // stage
 [Pipeline] withEnv
@@ -34,7 +34,7 @@ Commit message: "don't set nodePort manually, let k8s assign it automatically"
 [Pipeline] script
 [Pipeline] {
 [Pipeline] sh
-+ docker build -t baris1892/datascientest-movie-service:v.7.0 ./movie-service
++ docker build -t baris1892/datascientest-movie-service:v.17.0 ./movie-service
 #0 building with "default" instance using docker driver
 
 #1 [internal] load build definition from Dockerfile
@@ -58,16 +58,16 @@ Commit message: "don't set nodePort manually, let k8s assign it automatically"
 #6 transferring context: 334B done
 #6 DONE 0.0s
 
-#7 [5/6] RUN pip install -r /app/requirements.txt     && rm -rf /root/.cache/pip
+#7 [2/6] WORKDIR /app
 #7 CACHED
 
-#8 [4/6] RUN apt-get update     && apt-get install gcc -y     && apt-get clean
+#8 [3/6] COPY ./requirements.txt /app/requirements.txt
 #8 CACHED
 
-#9 [2/6] WORKDIR /app
+#9 [5/6] RUN pip install -r /app/requirements.txt     && rm -rf /root/.cache/pip
 #9 CACHED
 
-#10 [3/6] COPY ./requirements.txt /app/requirements.txt
+#10 [4/6] RUN apt-get update     && apt-get install gcc -y     && apt-get clean
 #10 CACHED
 
 #11 [6/6] COPY . /app/
@@ -76,10 +76,10 @@ Commit message: "don't set nodePort manually, let k8s assign it automatically"
 #12 exporting to image
 #12 exporting layers done
 #12 writing image sha256:367e171804b1bc97b7412f2c4ec7d4e86131eced389f63484ae6c9e6d93a445d done
-#12 naming to docker.io/baris1892/datascientest-movie-service:v.7.0 done
+#12 naming to docker.io/baris1892/datascientest-movie-service:v.17.0 done
 #12 DONE 0.0s
 [Pipeline] sh
-+ docker build -t baris1892/datascientest-cast-service:v.7.0 ./cast-service
++ docker build -t baris1892/datascientest-cast-service:v.17.0 ./cast-service
 #0 building with "default" instance using docker driver
 
 #1 [internal] load build definition from Dockerfile
@@ -100,16 +100,16 @@ Commit message: "don't set nodePort manually, let k8s assign it automatically"
 #5 transferring context: 295B done
 #5 DONE 0.0s
 
-#6 [4/6] RUN apt-get update     && apt-get install gcc -y     && apt-get clean
+#6 [2/6] WORKDIR /app
 #6 CACHED
 
-#7 [2/6] WORKDIR /app
+#7 [3/6] COPY ./requirements.txt /app/requirements.txt
 #7 CACHED
 
-#8 [3/6] COPY ./requirements.txt /app/requirements.txt
+#8 [5/6] RUN pip install -r /app/requirements.txt     && rm -rf /root/.cache/pip
 #8 CACHED
 
-#9 [5/6] RUN pip install -r /app/requirements.txt     && rm -rf /root/.cache/pip
+#9 [4/6] RUN apt-get update     && apt-get install gcc -y     && apt-get clean
 #9 CACHED
 
 #10 [6/6] COPY . /app/
@@ -118,8 +118,118 @@ Commit message: "don't set nodePort manually, let k8s assign it automatically"
 #11 exporting to image
 #11 exporting layers done
 #11 writing image sha256:b525f04cc4d735fdb9ecb3527e0be58cde390189568f8dc49f2b91eb7c226c80 done
-#11 naming to docker.io/baris1892/datascientest-cast-service:v.7.0 done
+#11 naming to docker.io/baris1892/datascientest-cast-service:v.17.0 done
 #11 DONE 0.0s
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Run & Test Cast Service)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ docker rm -f cast-test
++ docker rm -f postgres-test
++ docker network create test-net
+553d34a3b7b45cdaee2da83776bc6e5c3358ecb9e255d714bbc9a598fa1f8c25
++ docker run -d --name postgres-test --network test-net -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db postgres:12.1-alpine
+c5395c5bfa2c56f55e618e3dffd5c52536d6a17bc7730463e60023c5d9e608c0
++ docker exec postgres-test pg_isready -U user
+/var/run/postgresql:5432 - no response
++ echo Waiting for Postgres...
+Waiting for Postgres...
++ sleep 2
++ docker exec postgres-test pg_isready -U user
+/var/run/postgresql:5432 - accepting connections
++ docker run -d --name cast-test --network test-net -p 8082:8000 -e DATABASE_URI=postgresql://user:password@postgres-test/db baris1892/datascientest-cast-service:v.17.0 uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+7e41bf49f6a04ef231f82feb8d230402beb303332473cfe3ae3cc812d21e4830
++ sleep 10
++ curl --verbose --fail http://localhost:8082/api/v1/checkapi
+* Host localhost:8082 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying [::1]:8082...
+* Connected to localhost (::1) port 8082
+> GET /api/v1/checkapi HTTP/1.1
+> Host: localhost:8082
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< date: Wed, 19 Nov 2025 15:03:36 GMT
+< server: uvicorn
+< content-length: 15
+< content-type: application/json
+< 
+{ [15 bytes data]
+100    15  100    15    0     0   4012      0 --:--:-- --:--:-- --:--:--  5000
+* Connection #0 to host localhost left intact
+{"status":"ok"}+ docker stop cast-test postgres-test
+cast-test
+postgres-test
++ docker rm cast-test postgres-test
+cast-test
+postgres-test
++ docker network rm test-net
+test-net
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Docker Run & Test Movie Service)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ docker rm -f movie-test
++ docker rm -f postgres-test
++ docker network create test-net
+ffc56b13d23db775f0babf0df6717e75751d6399c40db2bee9181207341f995b
++ docker run -d --name postgres-test --network test-net -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=db postgres:12.1-alpine
+23d361fd83c2d3f0c896ffbbd2abe12b9f407915b5ffa881a51a9e915c6d3a47
++ docker exec postgres-test pg_isready -U user
+/var/run/postgresql:5432 - no response
++ echo Waiting for Postgres...
+Waiting for Postgres...
++ sleep 2
++ docker exec postgres-test pg_isready -U user
+/var/run/postgresql:5432 - accepting connections
++ docker run -d --name movie-test --network test-net -p 8081:8000 -e DATABASE_URI=postgresql://user:password@postgres-test/db baris1892/datascientest-movie-service:v.17.0 uvicorn app.main:app --host 0.0.0.0 --port 8000 --loop asyncio --http h11
+280f8c8db0a65503c8a39649ec2bed40c103bf54831eda1ccdd68e9eaa39e68f
++ sleep 10
++ curl --verbose --fail http://localhost:8081/api/v1/checkapi
+* Host localhost:8081 was resolved.
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying [::1]:8081...
+* Connected to localhost (::1) port 8081
+> GET /api/v1/checkapi HTTP/1.1
+> Host: localhost:8081
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< date: Wed, 19 Nov 2025 15:03:52 GMT
+< server: uvicorn
+< content-length: 15
+< content-type: application/json
+< 
+{ [15 bytes data]
+100    15  100    15    0     0   4288      0 --:--:-- --:--:-- --:--:--  5000
+* Connection #0 to host localhost left intact
+{"status":"ok"}+ docker stop movie-test postgres-test
+movie-test
+postgres-test
++ docker rm movie-test postgres-test
+movie-test
+postgres-test
++ docker network rm test-net
+test-net
 [Pipeline] }
 [Pipeline] // script
 [Pipeline] }
@@ -138,7 +248,7 @@ Warning: A secret was passed to "sh" using Groovy String interpolation, which is
 + docker login -u baris1892 -p ****
 WARNING! Using --password via the CLI is insecure. Use --password-stdin.
 Login Succeeded
-+ docker push baris1892/datascientest-movie-service:v.7.0
++ docker push baris1892/datascientest-movie-service:v.17.0
 The push refers to repository [docker.io/baris1892/datascientest-movie-service]
 607bedd0cc4f: Preparing
 43cc231b2b21: Preparing
@@ -150,20 +260,20 @@ d2a2207b52a4: Preparing
 c3772b569c3a: Preparing
 8d853c8add5d: Preparing
 d2a2207b52a4: Waiting
-8d853c8add5d: Waiting
 5d2d143f3d7f: Waiting
 c3772b569c3a: Waiting
+8d853c8add5d: Waiting
 d054e2b7d135: Layer already exists
-026db65cc007: Layer already exists
 607bedd0cc4f: Layer already exists
-43cc231b2b21: Layer already exists
 4dd85a1f79f4: Layer already exists
-c3772b569c3a: Layer already exists
-5d2d143f3d7f: Layer already exists
+026db65cc007: Layer already exists
+43cc231b2b21: Layer already exists
 d2a2207b52a4: Layer already exists
 8d853c8add5d: Layer already exists
-v.7.0: digest: sha256:3a4b52d7344d09510f0975626f10230763966a0d98ca2a1b69ec33786de09aaf size: 2205
-+ docker push baris1892/datascientest-cast-service:v.7.0
+c3772b569c3a: Layer already exists
+5d2d143f3d7f: Layer already exists
+v.17.0: digest: sha256:3a4b52d7344d09510f0975626f10230763966a0d98ca2a1b69ec33786de09aaf size: 2205
++ docker push baris1892/datascientest-cast-service:v.17.0
 The push refers to repository [docker.io/baris1892/datascientest-cast-service]
 82420951796d: Preparing
 1aceac9354b9: Preparing
@@ -178,16 +288,16 @@ d2a2207b52a4: Waiting
 5d2d143f3d7f: Waiting
 c3772b569c3a: Waiting
 8d853c8add5d: Waiting
-026db65cc007: Layer already exists
-8df00834c297: Layer already exists
 82420951796d: Layer already exists
 50b847937045: Layer already exists
+026db65cc007: Layer already exists
+8df00834c297: Layer already exists
 1aceac9354b9: Layer already exists
-d2a2207b52a4: Layer already exists
-5d2d143f3d7f: Layer already exists
-c3772b569c3a: Layer already exists
 8d853c8add5d: Layer already exists
-v.7.0: digest: sha256:fa82128690feb7798c62f60e9b367f642da2f4663c0a4d3b15c72563d0e9ad15 size: 2205
+5d2d143f3d7f: Layer already exists
+d2a2207b52a4: Layer already exists
+c3772b569c3a: Layer already exists
+v.17.0: digest: sha256:fa82128690feb7798c62f60e9b367f642da2f4663c0a4d3b15c72563d0e9ad15 size: 2205
 [Pipeline] }
 [Pipeline] // script
 [Pipeline] }
@@ -205,39 +315,43 @@ Masking supported pattern matches of $KUBECONFIG
 + rm -Rf .kube
 + mkdir .kube
 + ls
+Documentation.docx
+Documentation.pdf
 Jenkinsfile
 README.md
 cast-service
 charts
 docker-compose.yml
+jenkins-logs-build-#7.txt
 movie-service
 nginx_config.conf
+notes.md
 values-cast-service.yml
 values-movie-service.yml
 + cat ****
 + cp charts/values-cast-service.yaml values-cast-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-cast-service.yml
 + helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace dev
 Release "cast-service" has been upgraded. Happy Helming!
 NAME: cast-service
-LAST DEPLOYED: Tue Nov 18 17:11:41 2025
+LAST DEPLOYED: Wed Nov 19 15:04:01 2025
 NAMESPACE: dev
 STATUS: deployed
-REVISION: 11
+REVISION: 17
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace dev -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
   export NODE_IP=$(kubectl get nodes --namespace dev -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 + cp charts/values-movie-service.yaml values-movie-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-movie-service.yml
 + helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace dev
 Release "movie-service" has been upgraded. Happy Helming!
 NAME: movie-service
-LAST DEPLOYED: Tue Nov 18 17:11:42 2025
+LAST DEPLOYED: Wed Nov 19 15:04:02 2025
 NAMESPACE: dev
 STATUS: deployed
-REVISION: 7
+REVISION: 13
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace dev -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
@@ -260,39 +374,43 @@ Masking supported pattern matches of $KUBECONFIG
 + rm -Rf .kube
 + mkdir .kube
 + ls
+Documentation.docx
+Documentation.pdf
 Jenkinsfile
 README.md
 cast-service
 charts
 docker-compose.yml
+jenkins-logs-build-#7.txt
 movie-service
 nginx_config.conf
+notes.md
 values-cast-service.yml
 values-movie-service.yml
 + cat ****
 + cp charts/values-cast-service.yaml values-cast-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-cast-service.yml
 + helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace qa
 Release "cast-service" has been upgraded. Happy Helming!
 NAME: cast-service
-LAST DEPLOYED: Tue Nov 18 17:11:45 2025
+LAST DEPLOYED: Wed Nov 19 15:04:05 2025
 NAMESPACE: qa
 STATUS: deployed
-REVISION: 3
+REVISION: 9
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace qa -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
   export NODE_IP=$(kubectl get nodes --namespace qa -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 + cp charts/values-movie-service.yaml values-movie-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-movie-service.yml
 + helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace qa
 Release "movie-service" has been upgraded. Happy Helming!
 NAME: movie-service
-LAST DEPLOYED: Tue Nov 18 17:11:47 2025
+LAST DEPLOYED: Wed Nov 19 15:04:07 2025
 NAMESPACE: qa
 STATUS: deployed
-REVISION: 2
+REVISION: 8
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace qa -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
@@ -315,39 +433,43 @@ Masking supported pattern matches of $KUBECONFIG
 + rm -Rf .kube
 + mkdir .kube
 + ls
+Documentation.docx
+Documentation.pdf
 Jenkinsfile
 README.md
 cast-service
 charts
 docker-compose.yml
+jenkins-logs-build-#7.txt
 movie-service
 nginx_config.conf
+notes.md
 values-cast-service.yml
 values-movie-service.yml
 + cat ****
 + cp charts/values-cast-service.yaml values-cast-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-cast-service.yml
 + helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace staging
 Release "cast-service" has been upgraded. Happy Helming!
 NAME: cast-service
-LAST DEPLOYED: Tue Nov 18 17:11:51 2025
+LAST DEPLOYED: Wed Nov 19 15:04:10 2025
 NAMESPACE: staging
 STATUS: deployed
-REVISION: 2
+REVISION: 8
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace staging -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
   export NODE_IP=$(kubectl get nodes --namespace staging -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 + cp charts/values-movie-service.yaml values-movie-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-movie-service.yml
 + helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace staging
 Release "movie-service" has been upgraded. Happy Helming!
 NAME: movie-service
-LAST DEPLOYED: Tue Nov 18 17:11:52 2025
+LAST DEPLOYED: Wed Nov 19 15:04:12 2025
 NAMESPACE: staging
 STATUS: deployed
-REVISION: 2
+REVISION: 8
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace staging -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
@@ -379,39 +501,43 @@ Approved by Baris
 + rm -Rf .kube
 + mkdir .kube
 + ls
+Documentation.docx
+Documentation.pdf
 Jenkinsfile
 README.md
 cast-service
 charts
 docker-compose.yml
+jenkins-logs-build-#7.txt
 movie-service
 nginx_config.conf
+notes.md
 values-cast-service.yml
 values-movie-service.yml
 + cat ****
 + cp charts/values-cast-service.yaml values-cast-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-cast-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-cast-service.yml
 + helm upgrade --install cast-service ./charts -f values-cast-service.yml --namespace prod
 Release "cast-service" has been upgraded. Happy Helming!
 NAME: cast-service
-LAST DEPLOYED: Tue Nov 18 17:12:06 2025
+LAST DEPLOYED: Wed Nov 19 15:07:40 2025
 NAMESPACE: prod
 STATUS: deployed
-REVISION: 2
+REVISION: 6
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace prod -o jsonpath="{.spec.ports[0].nodePort}" services cast-service)
   export NODE_IP=$(kubectl get nodes --namespace prod -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 + cp charts/values-movie-service.yaml values-movie-service.yml
-+ sed -i s+tag.*+tag: v.7.0+g values-movie-service.yml
++ sed -i s+tag.*+tag: v.17.0+g values-movie-service.yml
 + helm upgrade --install movie-service ./charts -f values-movie-service.yml --namespace prod
 Release "movie-service" has been upgraded. Happy Helming!
 NAME: movie-service
-LAST DEPLOYED: Tue Nov 18 17:12:08 2025
+LAST DEPLOYED: Wed Nov 19 15:07:41 2025
 NAMESPACE: prod
 STATUS: deployed
-REVISION: 2
+REVISION: 6
 NOTES:
 1. Get the application URL by running these commands:
   export NODE_PORT=$(kubectl get --namespace prod -o jsonpath="{.spec.ports[0].nodePort}" services movie-service)
